@@ -3,29 +3,38 @@ class WrapToClass {
         return type;
     }
 };
+
+const 
+isStampable = object => typeof object === 'object' && object !== null;
  
 class Stamp extends WrapToClass {
-    #property;
+    #settable = true;
     constructor( type ) {
         super( type );
     }
-    static isUnsettable( p ) {
-        return typeof p === 'object' && p && #property in p;
+    static hasBeenStamped( p ) {
+        return isStampable( p ) 
+            && #settable in p;
     }
-    static markAsUnsettable( p ) {
+    static areSettersBlocked( p ) {
+        return hasBeenStamped( p ) 
+            && p.#settable === false;
+    }
+    static mark( p, settable ) {
         // Mirror Object.freeze()
         if ( typeof p !== 'object' || !p )
-            return p;
-        if ( !( #property in p ) ) {
-            return new Stamp( p );
-        } else {
-            return p;
+            return;
+        if ( !( #settable in p ) ) {
+            p = new Stamp( p );
         }
+        if ( settable )
+            return;
+         
+        p.#settable = false;
     }
 };
-
-const {isUnsettable,markAsUnsettable} = Stamp;
-
+const {hasBeenStamped,areSettersBlocked,mark} = Stamp;
+export {areSettersBlocked};
 
 function 
 replaceSetters( object ) {
@@ -34,7 +43,7 @@ replaceSetters( object ) {
         if ( typeof set !== 'function' )
             continue;
         descriptor.set = function unsettableSet( value ) {
-            if ( isUnsettable( this ) )
+            if ( areSettersBlocked( this ) )
                 throw new Error( `cannot assign to read-only property ${JSON.stringify(name )}` );
             return set.call( this, value );
         }
@@ -42,23 +51,26 @@ replaceSetters( object ) {
     }
 }
 
-const converted = new WeakSet;
-function
-makeUnsettable( object ) {
-    if ( isUnsettable( object ) ) 
+export function
+preventSetters( object ) {
+    if ( !isStampable( object ) || areSettersBlocked( object ) ) 
         return object;
     for ( let o = object; o = Object.getPrototypeOf( o ); ) {
-        if ( converted.has( o ) )
+        // First draft used a WeakSet to record which prototypes had been seen
+        // and the existance of our property was the boolean that indicated
+        // whether preventSetters had been called.
+        //
+        // I decided to stamp everything, and use its value, to avoid a WeakSet.
+        // Discuss.
+        if ( hasBeenStamped( o ) )
             break;
         replaceSetters( o );
-        converted.add( o );
+        mark( o, true );
     }
     replaceSetters( object );
-    markAsUnsettable( object );
+    mark( object, false );
     Object.freeze( object );
-    return object; 
+    return object;
 }
-export const 
-isSettable = object => !isUnsettable( object ),
-preventSetters = object => makeUnsettable( object ); 
+ 
 
