@@ -119,24 +119,24 @@ Limitations and implementation details
  - A private field is added to objects passed to `preventSetters()`, in
    addition to its setters being rewritten, and that changes the "shape"
    of the object - which will hurt performance in most engines. It means
-   objects which have and haven't been through preventSetters()` will
+   objects which have and haven't been through `preventSetters()` will
    have different "shapes" so there's concealed polymorphism.
   
  - The entire prototype chain of an object is monkey-patched with all
-   it's setters being rewritten, and each then has the private field
+   the setters being rewritten, and each prototype object then has the private field
    added. Suffice to say, peformance will suffer. But if this proves
    popular, who knows TC39 may decide to implement it for real. ;)       
   
 My recommendation would be:  
   1. Only use `preventSetters()` on your own classes. 
-  2. call `preventSetters()` ommediately after the declaraion of a
+  2. call `preventSetters()` immediately after the declaraion of a
      class; for example:
-  ```js
-  class C {
-    // ... 
-  };
-  preventSetters( new C );   
-  ```
-  This means the changes to the prototype happen before most classes are
-  instanced. I might add a class decorator, once this decorators
-  become mainstream. 
+     ```js
+      class C {
+         // ... 
+      };
+      preventSetters( new C );   
+      ```
+     This means the changes to the prototype happen before most classes are
+     instanced. I might add a class decorator, once decorators
+     become mainstream. 
