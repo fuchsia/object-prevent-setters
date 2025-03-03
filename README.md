@@ -4,7 +4,7 @@ Object_preventSetters
 additionally_ alters it so its setters throw.
   
 ```js
-import {preventSetters,areSettersBlocked} from "object-make-unsettable";  
+import {preventSetters,areSettersBlocked} from "object-prevent-setters";  
   
 const u = new URL( "https://example.com/index.html" );
 preventSetters( u );
@@ -37,7 +37,7 @@ It's not perfect. But if a class's methods use its own setters, then you
 will get readonly protection:
   
 ```js
-import {preventSetters} from "object-make-unsettable";
+import {preventSetters} from "object-prevent-setters";
 
 class Pt {
   #x = 0;
@@ -81,8 +81,8 @@ on its prototype chain, so that they _throw_ when used on this object.
   
 It then **freezes the object** (with `Object.freeze()`).
   
-In common with `Object.freeze()` non-object values are ignored.  For
-convienece, `object` is returned 
+In common with `Object.freeze()`, non-object values are ignored.  For
+convienece, `object` is returned. 
     
 ### areSettersBlocked(object)
  - `object` anything.
@@ -139,4 +139,9 @@ My recommendation would be:
       ```
      This means the changes to the prototype happen before most classes are
      instanced. I might add a class decorator, once decorators
-     become mainstream. 
+     become mainstream.
+
+     
+Changes
+-------
+- 1.0.1 Fixed some typos in README.md (the examples used the old repository name).
