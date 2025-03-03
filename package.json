@@ -1,6 +1,6 @@
 {
   "name": "object-prevent-setters",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Prevent setters being invoked on an object.",
   "repository": "github:fuchsia/object-prevent-setters",
   "main": "main.mjs",
